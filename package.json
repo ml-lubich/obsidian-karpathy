@@ -1,0 +1,15 @@
+{
+  "name": "obsidian-karpathy",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "sh ./scripts/dev.sh",
+    "dev:api": "uv run okg serve ${OKG_VAULT_PATH:-examples/demo-vault} --host 127.0.0.1 --no-open",
+    "dev:web": "cd web && bun run dev",
+    "build": "cd web && bun run build",
+    "build:web": "cd web && bun run build",
+    "preview:web": "cd web && bun run preview",
+    "serve": "uv run okg serve ${OKG_VAULT_PATH:-examples/demo-vault}",
+    "ci": "uv run pytest && cd web && bun run ci"
+  }
+}

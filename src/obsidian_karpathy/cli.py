@@ -13,6 +13,7 @@ from rich.console import Console
 from rich.table import Table
 
 from obsidian_karpathy import __version__
+from obsidian_karpathy.config import Settings
 from obsidian_karpathy.graph import build_graph
 from obsidian_karpathy.web import create_app
 
@@ -22,6 +23,30 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 console = Console()
+
+
+def _load_cfg() -> Settings:
+    return Settings()
+
+
+def _cfg_host(host: str | None, cfg: Settings) -> str:
+    if host:
+        return host
+    return cfg.host
+
+
+def _cfg_port(port: int | None, cfg: Settings) -> int:
+    if port is not None:
+        return port
+    return cfg.port
+
+
+def _cfg_vault(vault: Path | None, cfg: Settings) -> Path:
+    if vault is not None:
+        return vault
+    if cfg.vault_path:
+        return Path(cfg.vault_path)
+    raise typer.BadParameter("Vault path is required. Pass <vault> or set OKG_VAULT_PATH.")
 
 
 def _version_callback(value: bool) -> None:
@@ -73,20 +98,27 @@ def stats(
 
 @app.command()
 def serve(
-    vault: Annotated[Path, typer.Argument(help="Path to an Obsidian vault or Markdown folder.")],
-    host: Annotated[str, typer.Option("--host", help="Host for the web UI.")] = "127.0.0.1",
-    port: Annotated[int, typer.Option("--port", "-p", help="Port for the web UI.")] = 8765,
+    vault: Annotated[
+        Path | None,
+        typer.Argument(help="Path to an Obsidian vault or Markdown folder.", show_default=False),
+    ] = None,
+    host: Annotated[str | None, typer.Option("--host", help="Host for the web UI.")] = None,
+    port: Annotated[int | None, typer.Option("--port", "-p", help="Port for the web UI.")] = None,
     open_browser: Annotated[
         bool,
         typer.Option("--open/--no-open", help="Open the UI in a browser."),
     ] = True,
 ) -> None:
     """Serve the interactive graph UI."""
-    url = f"http://{host}:{port}"
+    cfg = _load_cfg()
+    resolved_vault = _cfg_vault(vault, cfg)
+    resolved_host = _cfg_host(host, cfg)
+    resolved_port = _cfg_port(port, cfg)
+    url = f"http://{resolved_host}:{resolved_port}"
     if open_browser:
         webbrowser.open(url)
-    console.print(f"[bold]Serving[/bold] {vault} at [cyan]{url}[/cyan]")
-    uvicorn.run(create_app(vault), host=host, port=port)
+    console.print(f"[bold]Serving[/bold] {resolved_vault} at [cyan]{url}[/cyan]")
+    uvicorn.run(create_app(resolved_vault), host=resolved_host, port=resolved_port)
 
 
 @app.command("init-demo")

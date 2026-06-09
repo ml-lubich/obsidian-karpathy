@@ -1,0 +1,20 @@
+services:
+  okg:
+    build: .
+    image: obsidian-karpathy:latest
+    ports:
+      - "8765:8765"
+    volumes:
+      # Mount your Obsidian vault here:
+      - ./examples/demo-vault:/data:ro
+    environment:
+      # LLM integration (optional — any OpenAI-compatible API)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8765/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

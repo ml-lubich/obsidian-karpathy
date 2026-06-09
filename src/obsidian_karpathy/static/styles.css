@@ -51,6 +51,7 @@ input {
   border-radius: 8px;
   background: var(--panel);
   box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
 }
 

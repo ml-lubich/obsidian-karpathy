@@ -1,6 +1,6 @@
 [project]
 name = "obsidian-karpathy"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Karpathy-inspired Obsidian knowledge graph explorer with a CLI and sleek web UI."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -27,6 +27,8 @@ classifiers = [
 dependencies = [
   "fastapi>=0.115.0",
   "markdown-it-py>=3.0.0",
+  "openai>=1.40.0",
+  "pydantic-settings>=2.3.4",
   "rich>=13.7.0",
   "typer>=0.12.5",
   "uvicorn[standard]>=0.30.0",

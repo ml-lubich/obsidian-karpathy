@@ -7,6 +7,31 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Root `bun` workflow via `package.json` so `bun run dev` works from repo root.
+- LLM endpoints: `GET /api/llm-status` and `POST /api/chat` (OpenAI-compatible).
+- Docker multi-stage build with Bun frontend build + Python backend runtime.
+- Docker Compose service with optional LLM environment wiring and healthcheck.
+
+### Changed
+
+- README and runbook updated for standalone + Docker workflows.
+- API docs updated to current graph schema and LLM endpoints.
+- Frontend TypeScript and CSS compatibility fixes (`forceConsistentCasingInFileNames`, Safari blur prefix).
+- Root `bun run dev` now launches the Python API and Vite frontend together.
+
+## [0.2.0] - 2026-06-09
+
+### Added
+
+- React/Bun frontend workflow integrated with Python backend for local dev and Docker.
+- LLM chat panel and backend endpoints for OpenAI-compatible providers.
+
+### Changed
+
+- Productionization pass across docs, runbook, API schema, testing flow, and deployment paths.
+
 ## [0.1.0] - 2026-06-08
 
 ### Added

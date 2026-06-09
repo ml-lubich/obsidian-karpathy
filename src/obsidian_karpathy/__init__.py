@@ -3,4 +3,4 @@
 from obsidian_karpathy.graph import build_graph
 
 __all__ = ["build_graph"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"

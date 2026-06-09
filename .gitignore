@@ -9,3 +9,7 @@ build/
 dist/
 graph.json
 htmlcov/
+web/node_modules/
+web/bun.lockb
+src/obsidian_karpathy/static/dist/
+.env

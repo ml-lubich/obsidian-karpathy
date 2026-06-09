@@ -4,6 +4,8 @@ A Karpathy-inspired knowledge graph explorer for any Obsidian-style Markdown vau
 wiki links, Markdown links, tags, front matter, and summaries, then serves a sleek force-directed
 graph with search, filters, stats, and node inspection.
 
+This project is inspired by Andrej Karpathy's practical, model-first approach to building tools.
+
 Created by [Misha Lubich](https://mishalubich.com) ([ml-lubich](https://github.com/ml-lubich)).
 
 ## Features
@@ -17,14 +19,51 @@ Created by [Misha Lubich](https://mishalubich.com) ([ml-lubich](https://github.c
 - Demo vault for instant populated graphs
 - Pytest coverage gate set to at least 80%
 
+## Setup
+
+```bash
+./scripts/setup.sh
+```
+
 ## Quick Start
 
 ```bash
-uv sync
+bun run dev
+```
+
+Run this from the repo root. It starts:
+
+- the Python API on `http://127.0.0.1:8765`
+- the Bun/Vite frontend on `http://127.0.0.1:5173`
+
+## Standalone service
+
+```bash
 uv run okg serve examples/demo-vault
 ```
 
 Open `http://127.0.0.1:8765` if your browser does not open automatically.
+
+## Docker
+
+```bash
+docker compose up --build
+```
+
+This runs the backend and serves the built React frontend at `http://127.0.0.1:8765`.
+To use your own vault, replace the mounted `./examples/demo-vault` path in `docker-compose.yml`.
+
+## LLM Wiring (OpenAI-compatible)
+
+Copy `.env.example` to `.env` and set your key if your local `.env` does not already exist:
+
+```bash
+OPENAI_API_KEY=your_key_here
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4o-mini
+```
+
+Any OpenAI-compatible endpoint works (OpenAI, Ollama, Groq, etc.).
 
 ## CLI
 
@@ -56,11 +95,13 @@ Edges are typed as `wiki`, `markdown`, or `tag`.
 
 ```bash
 uv sync --dev
+cd web && bun install
 uv run pytest
+bun run ci
 uv run ruff check .
 ```
 
-The test suite enforces 80% minimum coverage through `pyproject.toml`.
+The full repo verification gate is `bun run ci` from the repo root.
 
 ## Package Metadata
 
