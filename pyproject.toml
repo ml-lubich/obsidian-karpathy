@@ -57,6 +57,7 @@ packages = ["src/obsidian_karpathy"]
 [tool.pytest.ini_options]
 addopts = "--cov=obsidian_karpathy --cov-report=term-missing --cov-fail-under=80"
 testpaths = ["tests"]
+pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 100
