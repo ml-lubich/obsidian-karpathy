@@ -1,16 +1,23 @@
 import { useState } from "react";
-import type { GraphNode } from "../types";
+import type { ChatMode, GraphData, GraphNode, LLMStatus } from "../types";
 import { Inspector } from "./Inspector";
 import { Chat } from "./Chat";
+import { Settings } from "./Settings";
 
 interface Props {
+  graph: GraphData;
   selected: GraphNode | null;
   llmEnabled: boolean;
+  mode: ChatMode;
+  model: string;
+  baseUrl: string;
+  onSelect: (node: GraphNode | null) => void;
+  onSettingsSaved: (status: LLMStatus) => void;
 }
 
-type Tab = "inspector" | "chat";
+type Tab = "inspector" | "chat" | "settings";
 
-export function RightPanel({ selected, llmEnabled }: Props) {
+export function RightPanel({ graph, selected, llmEnabled, mode, model, baseUrl, onSelect, onSettingsSaved }: Props) {
   const [tab, setTab] = useState<Tab>("inspector");
 
   return (
@@ -22,12 +29,21 @@ export function RightPanel({ selected, llmEnabled }: Props) {
         <button className={`tab${tab === "chat" ? " active" : ""}`} onClick={() => setTab("chat")}>
           AI Chat {llmEnabled ? "✓" : ""}
         </button>
+        <button className={`tab${tab === "settings" ? " active" : ""}`} onClick={() => setTab("settings")}>
+          Settings
+        </button>
       </div>
       <div className="tab-content">
-        {tab === "inspector" ? (
-          <Inspector node={selected} />
-        ) : (
-          <Chat enabled={llmEnabled} />
+        {tab === "inspector" && <Inspector node={selected} graph={graph} onSelect={onSelect} />}
+        {tab === "chat" && <Chat enabled={llmEnabled} mode={mode} focusNodeId={selected?.id ?? ""} />}
+        {tab === "settings" && (
+          <Settings
+            selectedNodeId={selected?.id ?? ""}
+            mode={mode}
+            model={model}
+            baseUrl={baseUrl}
+            onSettingsSaved={onSettingsSaved}
+          />
         )}
       </div>
     </aside>

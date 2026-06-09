@@ -16,6 +16,9 @@ Created by [Misha Lubich](https://mishalubich.com) ([ml-lubich](https://github.c
 - Tag nodes from front matter and inline hashtags
 - Missing-link nodes so incomplete ideas still appear in the graph
 - FastAPI web server with a modern D3 force-directed UI
+- Dark/light mode toggle and settings panel
+- Configurable chat modes (`basic`, `rag`, `tools`) and runtime LLM endpoint/model settings
+- Summarization and pruning job controls for agentic-style maintenance loops
 - Demo vault for instant populated graphs
 - Pytest coverage gate set to at least 80%
 
@@ -90,6 +93,12 @@ The generated graph contains three node kinds:
 - `missing`: unresolved wiki links, useful for planned notes
 
 Edges are typed as `wiki`, `markdown`, or `tag`.
+
+Note nodes expose:
+
+- `short_label`: compact 1-3 word graph label
+- `markdown`: attached markdown body for inspector exploration
+- `markdown_length`: used to scale node size in the graph
 
 ## Development
 

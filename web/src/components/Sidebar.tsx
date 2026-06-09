@@ -4,9 +4,11 @@ interface Props {
   stats: GraphStats;
   filter: string;
   search: string;
+  theme: "dark" | "light";
   llmStatus: LLMStatus | null;
   onFilter: (f: string) => void;
   onSearch: (s: string) => void;
+  onToggleTheme: () => void;
 }
 
 const FILTERS = ["all", "note", "tag", "missing"] as const;
@@ -27,7 +29,7 @@ function LLMBadge({ status }: { status: LLMStatus | null }) {
   return <div className={cls}>{label}</div>;
 }
 
-export function Sidebar({ stats, filter, search, llmStatus, onFilter, onSearch }: Props) {
+export function Sidebar({ stats, filter, search, theme, llmStatus, onFilter, onSearch, onToggleTheme }: Props) {
   return (
     <aside className="panel sidebar">
       <div className="brand">
@@ -37,6 +39,10 @@ export function Sidebar({ stats, filter, search, llmStatus, onFilter, onSearch }
           <h1>Knowledge Map</h1>
         </div>
       </div>
+
+      <button className="theme-toggle" onClick={onToggleTheme}>
+        {theme === "dark" ? "☀ Light mode" : "🌙 Dark mode"}
+      </button>
 
       <label className="search">
         <span>Search</span>

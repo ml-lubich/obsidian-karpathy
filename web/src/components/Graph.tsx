@@ -23,7 +23,9 @@ function nodeRadius(n: GraphNode): number {
   const deg = (n.backlinks ?? 0) + (n.outlinks ?? 0);
   if (n.kind === "tag") return 8 + Math.min(deg, 10);
   if (n.kind === "missing") return 7;
-  return 10 + Math.min(Math.sqrt(n.word_count ?? 1), 14) + Math.min(deg, 8);
+  const markdownLength = n.markdown_length ?? 0;
+  const lengthBoost = Math.min(Math.sqrt(Math.max(markdownLength, 1)) / 6, 16);
+  return 10 + lengthBoost + Math.min(deg, 8);
 }
 
 function _filtered(graph: GraphData, filter: string, search: string) {
@@ -70,9 +72,12 @@ export function Graph({ graph, filter, search, selected, onSelect }: Props) {
 
     const layer = root.append("g");
     const links = layer.append("g").selectAll("line").data(edges).join("line").attr("class", "link");
+    links
+      .attr("stroke", (d) => _isSelectedEdge(d, selected?.id ?? "") ? "rgba(142, 202, 230, 0.8)" : "rgba(255,255,255,0.12)")
+      .attr("stroke-width", (d) => _isSelectedEdge(d, selected?.id ?? "") ? 2.3 : 1.5);
     const nodeG = layer.append("g").selectAll("g").data(nodes).join("g").attr("class", "node-g");
     nodeG.append("circle").attr("r", nodeRadius).attr("fill", (d) => COLORS[d.kind] ?? "#888").attr("stroke", (d) => selected?.id === d.id ? "#fff" : "transparent").attr("stroke-width", 2);
-    nodeG.append("text").attr("dy", "0.35em").attr("x", (d) => nodeRadius(d) + 4).text((d) => d.title).attr("font-size", 11).attr("fill", "#f4f0e8").attr("pointer-events", "none");
+    nodeG.append("text").attr("dy", "0.35em").attr("x", (d) => nodeRadius(d) + 4).text((d) => d.label || d.title).attr("font-size", 11).attr("fill", "var(--text)").attr("pointer-events", "none");
     nodeG.style("cursor", "pointer").on("click", (_, d) => onSelect(selected?.id === d.id ? null : d));
 
     const sim = _buildSim(nodes, edges, w, h);
@@ -89,4 +94,12 @@ export function Graph({ graph, filter, search, selected, onSelect }: Props) {
   }, [graph, filter, search, selected, onSelect]);
 
   return <svg ref={svgRef} id="graph" className="graph-canvas" role="img" aria-label="Knowledge graph" />;
+}
+
+
+function _isSelectedEdge(edge: SimLink, selectedId: string): boolean {
+  if (!selectedId) return false;
+  const source = typeof edge.source === "object" ? edge.source.id : String(edge.source);
+  const target = typeof edge.target === "object" ? edge.target.id : String(edge.target);
+  return source === selectedId || target === selectedId;
 }

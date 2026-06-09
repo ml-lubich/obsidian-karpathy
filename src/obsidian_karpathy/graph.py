@@ -20,9 +20,12 @@ def build_graph(vault_path: str | Path) -> KnowledgeGraph:
         note.id: Node(
             id=note.id,
             title=note.title,
+            short_label=_short_label(note.title),
             kind="note",
             path=note.path,
             summary=note.summary,
+            markdown=note.body,
+            markdown_length=len(note.body),
             tags=sorted(note.tags),
             word_count=note.word_count,
         )
@@ -33,7 +36,10 @@ def build_graph(vault_path: str | Path) -> KnowledgeGraph:
     for note in notes:
         for tag in sorted(note.tags):
             tag_id = f"tag:{tag}"
-            nodes.setdefault(tag_id, Node(id=tag_id, title=f"#{tag}", kind="tag"))
+            nodes.setdefault(
+                tag_id,
+                Node(id=tag_id, title=f"#{tag}", short_label=f"#{tag}", kind="tag"),
+            )
             edges.add(Edge(source=note.id, target=tag_id, kind="tag", label=tag))
 
         for target in note.wiki_links:
@@ -42,7 +48,15 @@ def build_graph(vault_path: str | Path) -> KnowledgeGraph:
                 edges.add(Edge(source=note.id, target=target_id, kind="wiki", label=target))
             else:
                 missing_id = f"missing:{slugify(target)}"
-                nodes.setdefault(missing_id, Node(id=missing_id, title=target, kind="missing"))
+                nodes.setdefault(
+                    missing_id,
+                    Node(
+                        id=missing_id,
+                        title=target,
+                        short_label=_short_label(target),
+                        kind="missing",
+                    ),
+                )
                 edges.add(Edge(source=note.id, target=missing_id, kind="wiki", label=target))
 
         for target in filter(None, note.markdown_links):
@@ -109,6 +123,11 @@ def _stats(nodes: list[Node], edges: list[Edge], root: Path) -> dict[str, int | 
         "words": total_words,
         "average_words": round(total_words / note_count, 1) if note_count else 0,
     }
+
+
+def _short_label(title: str) -> str:
+    words = [word for word in title.replace("#", " #").split() if word]
+    return " ".join(words[:3]) if words else "Untitled"
 
 
 def graph_to_jsonable(vault_path: str | Path) -> dict[str, object]:

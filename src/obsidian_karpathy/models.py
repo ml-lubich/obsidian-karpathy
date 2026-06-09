@@ -24,9 +24,12 @@ class Note:
 class Node:
     id: str
     title: str
+    short_label: str
     kind: NodeKind
     path: str | None = None
     summary: str = ""
+    markdown: str = ""
+    markdown_length: int = 0
     tags: list[str] = field(default_factory=list)
     word_count: int = 0
     backlinks: int = 0

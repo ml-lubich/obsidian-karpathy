@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
 import { sendChat } from "../api";
-import type { ChatMessage } from "../types";
+import type { ChatMessage, ChatMode } from "../types";
 
 interface Props {
   enabled: boolean;
+  mode: ChatMode;
+  focusNodeId: string;
 }
 
 function _userMsg(content: string): ChatMessage {
@@ -15,7 +17,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
   return <div className={cls}>{msg.content}</div>;
 }
 
-export function Chat({ enabled }: Props) {
+export function Chat({ enabled, mode, focusNodeId }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ export function Chat({ enabled }: Props) {
     setInput("");
     setLoading(true);
     setError("");
-    const reply = await sendChat(next).catch((e: Error) => { setError(e.message); return ""; });
+    const reply = await sendChat(next, mode, focusNodeId).catch((e: Error) => { setError(e.message); return ""; });
     if (reply) setMessages([...next, { role: "assistant", content: reply }]);
     setLoading(false);
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);

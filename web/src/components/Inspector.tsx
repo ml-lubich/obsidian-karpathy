@@ -1,7 +1,9 @@
-import type { GraphNode } from "../types";
+import type { GraphData, GraphNode } from "../types";
 
 interface Props {
   node: GraphNode | null;
+  graph: GraphData;
+  onSelect: (node: GraphNode | null) => void;
 }
 
 function MetaGrid({ node }: { node: GraphNode }) {
@@ -25,7 +27,17 @@ function TagList({ tags }: { tags: string[] }) {
   );
 }
 
-export function Inspector({ node }: Props) {
+
+function _relatedNodes(node: GraphNode, graph: GraphData): GraphNode[] {
+  const linked = new Set<string>();
+  for (const edge of graph.edges) {
+    if (edge.source === node.id) linked.add(edge.target);
+    if (edge.target === node.id) linked.add(edge.source);
+  }
+  return graph.nodes.filter((candidate) => linked.has(candidate.id)).slice(0, 24);
+}
+
+export function Inspector({ node, graph, onSelect }: Props) {
   if (!node) {
     return (
       <div>
@@ -35,6 +47,8 @@ export function Inspector({ node }: Props) {
     );
   }
 
+  const related = _relatedNodes(node, graph);
+
   return (
     <div>
       <h2>{node.title}</h2>
@@ -42,6 +56,22 @@ export function Inspector({ node }: Props) {
       <p>{node.summary || `${node.kind} node`}</p>
       <MetaGrid node={node} />
       <TagList tags={node.tags ?? []} />
+
+      {node.markdown && (
+        <>
+          <h3>Markdown</h3>
+          <pre className="markdown-preview">{node.markdown}</pre>
+        </>
+      )}
+
+      <h3>Connected nodes</h3>
+      <div className="related-wrap">
+        {related.map((relatedNode) => (
+          <button key={relatedNode.id} className="related-node" onClick={() => onSelect(relatedNode)}>
+            {relatedNode.label || relatedNode.title}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

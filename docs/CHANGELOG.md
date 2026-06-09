@@ -7,6 +7,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Light/dark theme toggle in the UI sidebar.
+- Runtime `Settings` tab with in-memory LLM configuration and chat mode selection (`basic`, `rag`, `tools`).
+- Managed job lifecycle endpoints and UI controls for queue/run/cancel flows.
+- Pipeline job type that combines summarize + prune analysis for selected notes.
+
+### Changed
+
+- Graph node payload now includes `label`, `markdown`, and `markdown_length` for richer node rendering.
+- Graph visualization now scales note blob size by markdown length and emphasizes selected-node neighborhood.
+- Inspector now supports markdown preview plus connected-node exploration.
+
 ## [0.2.0] - 2026-06-09
 
 ### Added

@@ -1,26 +1,56 @@
 import { useEffect, useState } from "react";
 import { fetchGraph, fetchLLMStatus } from "./api";
-import type { GraphData, GraphNode, LLMStatus } from "./types";
+import type { ChatMode, GraphData, GraphNode, LLMStatus } from "./types";
 import { Graph } from "./components/Graph";
 import { Sidebar } from "./components/Sidebar";
 import { RightPanel } from "./components/RightPanel";
 import "./styles.css";
 
+const THEME_KEY = "okg-theme";
+
+function _storedTheme(): "dark" | "light" {
+  const stored = window.localStorage.getItem(THEME_KEY);
+  return stored === "light" ? "light" : "dark";
+}
+
 export function App() {
   const [graph, setGraph] = useState<GraphData | null>(null);
   const [llmStatus, setLLMStatus] = useState<LLMStatus | null>(null);
   const [selected, setSelected] = useState<GraphNode | null>(null);
+  const [theme, setTheme] = useState<"dark" | "light">(() => _storedTheme());
+  const [chatMode, setChatMode] = useState<ChatMode>("rag");
+  const [chatModel, setChatModel] = useState<string>("gpt-4o-mini");
+  const [chatBaseUrl, setChatBaseUrl] = useState<string>("https://api.openai.com/v1");
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
     fetchGraph().then(setGraph).catch((e: Error) => setError(e.message));
-    fetchLLMStatus().then(setLLMStatus).catch((e: Error) => {
+    fetchLLMStatus().then((status) => {
+      setLLMStatus(status);
+      setChatMode(status.mode);
+      setChatModel(status.model);
+      setChatBaseUrl(status.base_url);
+    }).catch((e: Error) => {
       console.error("Failed to fetch LLM status", e);
-      setLLMStatus({ enabled: false, model: "", base_url: "" });
+      setLLMStatus({ enabled: false, model: "", base_url: "", mode: "rag" });
     });
   }, []);
+
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+    window.localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+
+  const handleSettingsSaved = (status: LLMStatus) => {
+    setChatMode(status.mode);
+    setChatModel(status.model);
+    setChatBaseUrl(status.base_url);
+    setLLMStatus(status);
+  };
 
   if (error) return <div className="error-screen">{error}</div>;
   if (!graph) return <div className="loading-screen">Loading vault…</div>;
@@ -31,9 +61,11 @@ export function App() {
         stats={graph.stats}
         filter={filter}
         search={search}
+        theme={theme}
         llmStatus={llmStatus}
         onFilter={setFilter}
         onSearch={setSearch}
+        onToggleTheme={toggleTheme}
       />
       <section className="canvas-wrap" aria-label="Knowledge graph">
         <Graph
@@ -44,7 +76,16 @@ export function App() {
           onSelect={setSelected}
         />
       </section>
-      <RightPanel selected={selected} llmEnabled={llmStatus?.enabled ?? false} />
+      <RightPanel
+        graph={graph}
+        selected={selected}
+        llmEnabled={llmStatus?.enabled ?? false}
+        mode={chatMode}
+        model={chatModel}
+        baseUrl={chatBaseUrl}
+        onSelect={setSelected}
+        onSettingsSaved={handleSettingsSaved}
+      />
     </main>
   );
 }

@@ -14,8 +14,8 @@ Runs Python tests with coverage and verifies that the React frontend builds succ
 tests/
 ├── test_parser.py   — parser unit tests (wiki links, md links, tags, front matter)
 ├── test_graph.py    — graph builder tests (node dedup, edge resolution, ghost nodes)
-├── test_web.py      — FastAPI graph / health / LLM status integration tests
-├── test_llm.py      — LLM configuration unit tests
+├── test_web.py      — FastAPI graph / health / settings / jobs integration tests
+├── test_llm.py      — LLM configuration + mode/summarization behavior tests
 ├── test_config.py   — settings model unit tests
 └── test_cli.py      — CLI command smoke tests (build, stats, init-demo)
 ```

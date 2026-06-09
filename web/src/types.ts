@@ -1,9 +1,12 @@
 export interface GraphNode {
   id: string;
   title: string;
+  label: string;
   kind: "note" | "tag" | "missing";
   path?: string;
   summary?: string;
+  markdown?: string;
+  markdown_length?: number;
   tags?: string[];
   word_count?: number;
   backlinks?: number;
@@ -42,4 +45,27 @@ export interface LLMStatus {
   enabled: boolean;
   model: string;
   base_url: string;
+  mode: ChatMode;
+  api_key_source?: string;
+}
+
+export type ChatMode = "basic" | "rag" | "tools";
+
+export interface LLMSettingsInput {
+  api_key: string;
+  base_url: string;
+  model: string;
+  mode: ChatMode;
+}
+
+export interface JobRecord {
+  id: string;
+  type: "summarize" | "prune" | "pipeline";
+  status: "queued" | "running" | "completed" | "failed" | "cancelled";
+  created_at: string;
+  started_at?: string;
+  finished_at?: string;
+  node_id?: string;
+  error?: string;
+  result: Record<string, unknown>;
 }

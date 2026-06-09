@@ -35,4 +35,4 @@ class Settings(BaseSettings):
 
     @property
     def llm_enabled(self) -> bool:
-        return bool(self.openai_api_key)
+      return bool(self.openai_api_key.strip())

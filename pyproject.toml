@@ -1,6 +1,6 @@
 [project]
 name = "obsidian-karpathy"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Karpathy-inspired Obsidian knowledge graph explorer with a CLI and sleek web UI."
 readme = "README.md"
 requires-python = ">=3.11"

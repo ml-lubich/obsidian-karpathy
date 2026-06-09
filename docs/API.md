@@ -38,10 +38,13 @@ Returns the full graph for the active vault.
     {
       "id": "string",
       "title": "string",
+      "label": "string",
       "kind": "note | tag | missing",
       "path": "string | null",
       "tags": ["string"],
       "summary": "string",
+      "markdown": "string",
+      "markdown_length": 0,
       "word_count": 0,
       "backlinks": 0,
       "outlinks": 0
@@ -73,7 +76,22 @@ Returns whether chat is enabled and which model endpoint is configured.
 {
   "enabled": true,
   "model": "gpt-4o-mini",
-  "base_url": "https://api.openai.com/v1"
+  "base_url": "https://api.openai.com/v1",
+  "mode": "rag",
+  "api_key_source": "env | runtime"
+}
+```
+
+### `POST /api/settings/llm`
+
+Update runtime (in-memory) LLM settings used by chat and summarize jobs.
+
+```json
+{
+  "api_key": "optional-key",
+  "base_url": "https://api.openai.com/v1",
+  "model": "gpt-4o-mini",
+  "mode": "basic | rag | tools"
 }
 ```
 
@@ -87,7 +105,9 @@ Request body:
 {
   "messages": [
     { "role": "user", "content": "What notes discuss spaced repetition?" }
-  ]
+  ],
+  "mode": "rag",
+  "focus_node_id": "optional-node-id"
 }
 ```
 
@@ -98,6 +118,64 @@ Response body:
   "reply": "You have notes under Resources including Spaced Repetition..."
 }
 ```
+
+### `POST /api/jobs/summarize`
+
+Queue a summarization job for a selected note node.
+
+```json
+{ "node_id": "projects-graph-explorer" }
+```
+
+### `POST /api/jobs/prune`
+
+Queue a pruning analysis job (isolated/low-value note candidates).
+
+### `POST /api/jobs/pipeline`
+
+Queue a pipeline job for a selected note node (summary + prune analysis bundle).
+
+```json
+{ "node_id": "projects-graph-explorer" }
+```
+
+### `POST /api/jobs/run-next`
+
+Execute the next queued job and return its final state.
+
+Idle response when no jobs are queued:
+
+```json
+{ "status": "idle", "detail": "No queued jobs." }
+```
+
+### `POST /api/jobs/{job_id}/cancel`
+
+Cancel a queued/running job.
+
+### `GET /api/jobs/{job_id}`
+
+Fetch a single job by id.
+
+Response shape for both job endpoints:
+
+```json
+{
+  "id": "uuid",
+  "type": "summarize | prune | pipeline",
+  "status": "queued | running | completed | failed | cancelled",
+  "created_at": "ISO-8601 timestamp",
+  "started_at": "ISO-8601 timestamp",
+  "finished_at": "ISO-8601 timestamp",
+  "node_id": "optional-node-id",
+  "error": "optional-error-message",
+  "result": {}
+}
+```
+
+### `GET /api/jobs`
+
+List recent runtime jobs (latest first).
 
 ### `GET /healthz`
 

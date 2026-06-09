@@ -25,6 +25,12 @@ bun run dev
 - Vite UI: `http://127.0.0.1:5173`
 - Python service: `http://127.0.0.1:8765`
 
+The right panel now includes three tabs:
+
+- `Inspector`: click nodes to inspect summary, markdown, and connected nodes.
+- `AI Chat`: choose chat mode (`basic`, `rag`, `tools`) via Settings.
+- `Settings`: configure runtime LLM endpoint/model/key, queue jobs, run next queued job, and cancel queued/running jobs.
+
 ## Run (demo vault standalone)
 
 ```bash
@@ -76,6 +82,8 @@ Then open `http://127.0.0.1:8765`.
 | `Address already in use` on port 8765 | Another process holds the port | Pass `--port 9000` (or any free port). |
 | Empty graph / 0 nodes | Vault path wrong or no `.md` files | Confirm the path contains `.md` files at any depth. |
 | AI chat tab is disabled | `OPENAI_API_KEY` missing | Add it to `.env` or your shell environment and restart the server. |
+| Summarize job returns `node_id is required` | No node selected | Click a note in the graph, then run summarization from `Settings`. |
+| Job is queued but no result appears | Queue is paused | Click `Run next queued job` in `Settings` (or call `POST /api/jobs/run-next`). |
 | Coverage gate fails | New code not covered | Add a behaviour test; check `--cov-report=term-missing` output for uncovered lines. |
 
 ## Adding a new vault feature
