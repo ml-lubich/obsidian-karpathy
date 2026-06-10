@@ -34,6 +34,7 @@ class LLMSettingsRequest(BaseModel):
     base_url: str = ""
     model: str = ""
     mode: Literal["basic", "rag", "tools"] = "rag"
+    provider: Literal["openai", "anthropic"] = "openai"
 
 
 class JobRequest(BaseModel):
@@ -63,6 +64,7 @@ class RuntimeState:
     base_url: str = ""
     model: str = ""
     mode: Literal["basic", "rag", "tools"] = "rag"
+    provider: Literal["openai", "anthropic"] = "openai"
     jobs: dict[str, JobRecord] = field(default_factory=dict)
     queue: list[str] = field(default_factory=list)
 
@@ -135,7 +137,12 @@ def _write_env_value(key: str, value: str, env_path: Path = Path(".env")) -> Non
 def _load_persisted_settings(runtime: RuntimeState, env_path: Path = Path(".env")) -> None:
     """Load persisted LLM settings from .env into RuntimeState."""
     _ensure_env_file(env_path)
-    runtime.api_key = _read_env_value("OPENAI_API_KEY", env_path)
+    provider = _read_env_value("LLM_PROVIDER", env_path) or "openai"
+    runtime.provider = provider  # type: ignore[assignment]
+    if provider == "anthropic":
+        runtime.api_key = _read_env_value("ANTHROPIC_API_KEY", env_path)
+    else:
+        runtime.api_key = _read_env_value("OPENAI_API_KEY", env_path)
     runtime.base_url = _read_env_value("OPENAI_BASE_URL", env_path)
     runtime.model = _read_env_value("OPENAI_MODEL", env_path)
 
@@ -145,6 +152,7 @@ def _resolved_llm(runtime: RuntimeState) -> LLMConfig:
     runtime_key = runtime.api_key.strip()
     runtime_base = runtime.base_url.strip()
     runtime_model = runtime.model.strip()
+    provider = runtime.provider if runtime_key else cfg.provider
     api_key = runtime_key or cfg.api_key
     base_url = runtime_base or cfg.base_url
     model = runtime_model or cfg.model
@@ -153,6 +161,7 @@ def _resolved_llm(runtime: RuntimeState) -> LLMConfig:
         base_url=base_url,
         model=model,
         enabled=bool(api_key),
+        provider=provider,
     )
 
 
@@ -165,6 +174,7 @@ def _llm_status(runtime: RuntimeState) -> dict[str, object]:
         "base_url": cfg.base_url,
         "mode": runtime.mode,
         "api_key_source": source,
+        "provider": cfg.provider,
     }
 
 
@@ -327,9 +337,12 @@ def _add_graph_routes(app: FastAPI, root: Path, runtime: RuntimeState, env_path:
 
     @app.post("/api/settings/llm")
     def update_llm_settings(req: LLMSettingsRequest) -> dict[str, object]:
+        runtime.provider = req.provider
+        _write_env_value("LLM_PROVIDER", req.provider, env_path)
         if req.api_key.strip():
             runtime.api_key = req.api_key.strip()
-            _write_env_value("OPENAI_API_KEY", runtime.api_key, env_path)
+            key_name = "ANTHROPIC_API_KEY" if req.provider == "anthropic" else "OPENAI_API_KEY"
+            _write_env_value(key_name, runtime.api_key, env_path)
         if req.base_url.strip():
             runtime.base_url = req.base_url.strip()
             _write_env_value("OPENAI_BASE_URL", runtime.base_url, env_path)
@@ -343,7 +356,7 @@ def _add_graph_routes(app: FastAPI, root: Path, runtime: RuntimeState, env_path:
     def chat(req: ChatRequest) -> ChatResponse:
         cfg = _resolved_llm(runtime)
         if not cfg.enabled:
-            raise HTTPException(status_code=503, detail="LLM not configured. Set OPENAI_API_KEY.")
+            raise HTTPException(status_code=503, detail="LLM not configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY.")
         graph_data = build_graph(root).to_dict()
         mode = req.mode or runtime.mode
         reply = chat_with_vault(req.messages, graph_data, cfg, mode=mode, focus_node_id=req.focus_node_id)

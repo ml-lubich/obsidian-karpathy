@@ -10,6 +10,7 @@ def _clear_llm_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
     monkeypatch.delenv("OPENAI_MODEL", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
     monkeypatch.delenv("OKG_OPENAI_PREFER", raising=False)
 
 
@@ -90,12 +91,12 @@ def test_chat_with_vault_requires_enabled_llm() -> None:
         chat_with_vault([{"role": "user", "content": "hello"}], {"nodes": [], "edges": []}, cfg)
 
 
-def test_llm_config_detects_claude(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_llm_config_detects_anthropic(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-claude-key")
 
     cfg = LLMConfig.from_env()
 
-    assert cfg.provider == "claude"
+    assert cfg.provider == "anthropic"
     assert cfg.enabled is True
     assert cfg.api_key == "test-claude-key"
 
@@ -109,3 +110,23 @@ def test_llm_config_prefers_openai_when_requested(monkeypatch: pytest.MonkeyPatc
 
     assert cfg.provider == "openai"
     assert cfg.enabled is True
+
+
+def test_summarize_markdown_uses_anthropic_when_provider_set(monkeypatch: pytest.MonkeyPatch) -> None:
+    cfg = LLMConfig(api_key="sk-ant-x", base_url="", model="claude-3-5-haiku-20241022", enabled=True, provider="anthropic")
+    monkeypatch.setattr(llm, "_call_anthropic", lambda _msgs, _cfg: "claude summary")
+
+    summary = summarize_markdown("# Note\n\nBody", "Note", cfg)
+
+    assert summary == "claude summary"
+
+
+def test_llm_provider_explicit_override_via_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ant-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "oai-key")
+    monkeypatch.setenv("LLM_PROVIDER", "openai")
+
+    cfg = LLMConfig.from_env()
+
+    assert cfg.provider == "openai"
+    assert cfg.api_key == "oai-key"

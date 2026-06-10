@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-3-5-sonnet-20241022"
     openai_prefer: bool = False
 
+    # Explicit provider override ("openai" | "anthropic" | "" for auto-detect)
+    llm_provider: str = Field("", alias="LLM_PROVIDER")
+
     model_config = SettingsConfigDict(
       env_file=".env",
       env_file_encoding="utf-8",
@@ -52,7 +55,7 @@ class Settings(BaseSettings):
         if self.openai_prefer and has_openai:
             return "openai"
         if has_claude:
-            return "claude"
+            return "anthropic"
         if has_openai:
             return "openai"
         return "openai"

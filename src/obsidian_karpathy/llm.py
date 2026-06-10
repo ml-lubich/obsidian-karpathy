@@ -12,7 +12,7 @@ class LLMConfig:
     base_url: str
     model: str
     enabled: bool
-    provider: str = "openai"
+    provider: Literal["openai", "anthropic"] = "openai"
 
     @classmethod
     def from_env(
@@ -23,17 +23,10 @@ class LLMConfig:
         provider_override: str = "",
     ) -> "LLMConfig":
         cfg = Settings()
-        provider = provider_override or cfg.preferred_provider
-        
-        if provider == "claude":
-            api_key = cfg.anthropic_api_key.strip()
-            base_url = "https://api.anthropic.com/v1"
-            model = cfg.anthropic_model.strip()
-        else:
-            api_key = cfg.openai_api_key.strip()
-            base_url = base_url_override.strip() or cfg.openai_base_url.strip()
-            model = model_override.strip() or cfg.openai_model.strip()
-        
+        provider = _detect_provider(cfg, provider_override)
+        api_key = api_key_override or _pick_api_key(cfg, provider)
+        base_url = base_url_override or cfg.openai_base_url.strip()
+        model = model_override or _pick_model(cfg, provider)
         return cls(
             api_key=api_key,
             base_url=base_url,
@@ -41,6 +34,27 @@ class LLMConfig:
             enabled=bool(api_key),
             provider=provider,
         )
+
+
+def _detect_provider(cfg: Settings, override: str) -> Literal["openai", "anthropic"]:
+    if override in ("openai", "anthropic"):
+        return override  # type: ignore[return-value]
+    explicit = cfg.llm_provider.strip()
+    if explicit in ("openai", "anthropic"):
+        return explicit  # type: ignore[return-value]
+    return cfg.preferred_provider  # type: ignore[return-value]
+
+
+def _pick_api_key(cfg: Settings, provider: Literal["openai", "anthropic"]) -> str:
+    if provider == "anthropic":
+        return cfg.anthropic_api_key.strip()
+    return cfg.openai_api_key.strip()
+
+
+def _pick_model(cfg: Settings, provider: Literal["openai", "anthropic"]) -> str:
+    if provider == "anthropic":
+        return cfg.anthropic_model.strip() or "claude-3-5-sonnet-20241022"
+    return cfg.openai_model.strip() or "gpt-4o-mini"
 
 
 def _build_vault_context(graph_data: dict) -> str:
@@ -131,7 +145,7 @@ def _call_openai(
     return resp.choices[0].message.content or ""
 
 
-def _call_claude(
+def _call_anthropic(
     api_messages: list[dict[str, str]],
     config: LLMConfig,
 ) -> str:
@@ -148,8 +162,8 @@ def _call_claude(
     resp = client.messages.create(
         model=config.model,
         max_tokens=1024,
-        system=system if system else None,
-        messages=user_messages,
+        system=system or "You are a helpful assistant.",
+        messages=user_messages,  # type: ignore[arg-type]
     )
     return resp.content[0].text if resp.content else ""
 
@@ -159,8 +173,8 @@ def _call_llm(
     config: LLMConfig,
 ) -> str:
     """Dispatch to the appropriate LLM provider."""
-    if config.provider == "claude":
-        return _call_claude(api_messages, config)
+    if config.provider == "anthropic":
+        return _call_anthropic(api_messages, config)
     return _call_openai(api_messages, config)
 
 
