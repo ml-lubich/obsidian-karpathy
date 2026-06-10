@@ -95,9 +95,32 @@ Update runtime (in-memory) LLM settings used by chat and summarize jobs.
 }
 ```
 
+## Environment Variables
+
+### LLM Configuration
+
+| Var | Example | Meaning |
+|---|---|---|
+| `OPENAI_API_KEY` | `sk-...` | OpenAI API key; enables OpenAI backend |
+| `ANTHROPIC_API_KEY` | `sk-ant-...` | Claude API key; enables Claude backend |
+| `OKG_OPENAI_MODEL` | `gpt-4o` | Override OpenAI model (default `gpt-4o-mini`) |
+| `OKG_ANTHROPIC_MODEL` | `claude-3-5-sonnet-20241022` | Override Claude model (default `claude-3-5-sonnet-20241022`) |
+| `OKG_OPENAI_BASE_URL` | `https://api.openai.com/v1` | Custom OpenAI-compatible endpoint |
+| `OKG_OPENAI_PREFER` | `true` | Prefer OpenAI over Claude when both are configured |
+
+**Provider selection:** If both keys are configured, Claude is preferred by default. Set `OKG_OPENAI_PREFER=true` to use OpenAI instead.
+
+### Vault & Server
+
+| Var | Example | Meaning |
+|---|---|---|
+| `OKG_VAULT_PATH` | `/path/to/vault` | Vault directory; used by `okg serve` if no arg given |
+| `OKG_HOST` | `0.0.0.0` | Bind host (default `127.0.0.1`; use `0.0.0.0` in Docker) |
+| `OKG_PORT` | `8765` | Bind port (default `8765`) |
+
 ### `POST /api/chat`
 
-Chat with your vault context using any OpenAI-compatible backend.
+Chat with your vault context using OpenAI or Claude backend.
 
 Request body:
 

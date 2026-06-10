@@ -25,6 +25,7 @@ classifiers = [
   "Topic :: Text Processing :: Markup :: Markdown",
 ]
 dependencies = [
+  "anthropic>=0.109.1",
   "fastapi>=0.115.0",
   "markdown-it-py>=3.0.0",
   "openai>=1.40.0",

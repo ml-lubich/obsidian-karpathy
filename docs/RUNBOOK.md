@@ -16,11 +16,35 @@ cd obsidian-karpathy
 
 `scripts/setup.sh` installs `uv`/`bun` when missing, syncs Python deps, and installs frontend deps.
 
-## Run (full development stack)
+## LLM Configuration (OpenAI or Claude)
+
+Chat and summarization use an LLM backend. Configure either **OpenAI** or **Claude**:
+
+### OpenAI setup
 
 ```bash
-bun run dev
+export OPENAI_API_KEY="sk-..."
+export OPENAI_MODEL="gpt-4o-mini"  # optional; default
+uv run okg serve examples/demo-vault
 ```
+
+### Claude setup
+
+```bash
+export ANTHROPIC_API_KEY="sk-ant-..."
+uv run okg serve examples/demo-vault
+```
+
+Claude is auto-selected when both are set unless you prefer OpenAI:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+export OKG_OPENAI_PREFER="true"  # use OpenAI instead of Claude
+uv run okg serve examples/demo-vault
+```
+
+**Model selection:** Claude defaults to `claude-3-5-sonnet-20241022`. Override via `OKG_ANTHROPIC_MODEL` (currently not a CLI flag; use `.env` or `OKG_` prefix).
 
 - Vite UI: `http://127.0.0.1:5173`
 - Python service: `http://127.0.0.1:8765`

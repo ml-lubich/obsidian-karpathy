@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Claude/Anthropic LLM support alongside OpenAI. Configure via `ANTHROPIC_API_KEY` environment variable.
+- Auto-detection of LLM provider: uses Claude by default when both OpenAI and Claude keys are present; override with `OKG_OPENAI_PREFER=true`.
 - Light/dark theme toggle in the UI sidebar.
 - Runtime `Settings` tab with in-memory LLM configuration and chat mode selection (`basic`, `rag`, `tools`).
 - Managed job lifecycle endpoints and UI controls for queue/run/cancel flows.

@@ -12,6 +12,7 @@ class LLMConfig:
     base_url: str
     model: str
     enabled: bool
+    provider: str = "openai"
 
     @classmethod
     def from_env(
@@ -19,16 +20,26 @@ class LLMConfig:
         api_key_override: str = "",
         base_url_override: str = "",
         model_override: str = "",
+        provider_override: str = "",
     ) -> "LLMConfig":
         cfg = Settings()
-        api_key = cfg.openai_api_key.strip()
-        base_url = cfg.openai_base_url.strip()
-        model = cfg.openai_model.strip()
+        provider = provider_override or cfg.preferred_provider
+        
+        if provider == "claude":
+            api_key = cfg.anthropic_api_key.strip()
+            base_url = "https://api.anthropic.com/v1"
+            model = cfg.anthropic_model.strip()
+        else:
+            api_key = cfg.openai_api_key.strip()
+            base_url = base_url_override.strip() or cfg.openai_base_url.strip()
+            model = model_override.strip() or cfg.openai_model.strip()
+        
         return cls(
             api_key=api_key,
             base_url=base_url,
             model=model,
             enabled=bool(api_key),
+            provider=provider,
         )
 
 
@@ -120,6 +131,39 @@ def _call_openai(
     return resp.choices[0].message.content or ""
 
 
+def _call_claude(
+    api_messages: list[dict[str, str]],
+    config: LLMConfig,
+) -> str:
+    import anthropic  # noqa: PLC0415
+
+    client = anthropic.Anthropic(api_key=config.api_key)
+    system = ""
+    user_messages = []
+    for msg in api_messages:
+        if msg["role"] == "system":
+            system = msg["content"]
+        else:
+            user_messages.append(msg)
+    resp = client.messages.create(
+        model=config.model,
+        max_tokens=1024,
+        system=system if system else None,
+        messages=user_messages,
+    )
+    return resp.content[0].text if resp.content else ""
+
+
+def _call_llm(
+    api_messages: list[dict[str, str]],
+    config: LLMConfig,
+) -> str:
+    """Dispatch to the appropriate LLM provider."""
+    if config.provider == "claude":
+        return _call_claude(api_messages, config)
+    return _call_openai(api_messages, config)
+
+
 def summarize_markdown(markdown: str, title: str, config: LLMConfig) -> str:
     if not config.enabled:
         return _fallback_summary(markdown)
@@ -129,7 +173,7 @@ def summarize_markdown(markdown: str, title: str, config: LLMConfig) -> str:
         f"Markdown:\n{markdown[:6000]}"
     )
     api_messages = [{"role": "user", "content": prompt}]
-    return _call_openai(api_messages, config) or _fallback_summary(markdown)
+    return _call_llm(api_messages, config) or _fallback_summary(markdown)
 
 
 def _context_for_mode(
@@ -153,12 +197,12 @@ def chat_with_vault(
     focus_node_id: str = "",
 ) -> str:
     if not config.enabled:
-        raise ValueError("LLM is not configured. Set OPENAI_API_KEY environment variable.")
+        raise ValueError("LLM is not configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable.")
     user_text = messages[-1]["content"] if messages else ""
     context = _context_for_mode(mode, graph_data, focus_node_id, user_text)
     system = _make_system_prompt(context)
     api_messages: list[dict[str, str]] = [{"role": "system", "content": system}, *messages]
-    return _call_openai(api_messages, config)
+    return _call_llm(api_messages, config)
 
 
 def propose_summarization_jobs(graph_data: dict, limit: int = 12) -> list[dict[str, object]]:
