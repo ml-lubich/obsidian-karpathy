@@ -3,7 +3,7 @@
 ## Module Map
 
 ```
-src/obsidian_karpathy/
+src/obsidian_knowledge_base/
 ├── __init__.py       — public API: exports build_graph, __version__
 ├── cli.py            — Typer CLI entry point (okg); no business logic
 ├── config.py         — settings model for env / .env runtime configuration

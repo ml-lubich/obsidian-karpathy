@@ -15,8 +15,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from obsidian_karpathy.graph import build_graph
-from obsidian_karpathy.llm import LLMConfig, chat_with_vault, summarize_markdown
+from obsidian_knowledge_base.graph import build_graph
+from obsidian_knowledge_base.llm import LLMConfig, chat_with_vault, summarize_markdown
 
 
 class ChatRequest(BaseModel):
@@ -420,7 +420,7 @@ def _add_spa_routes(app: FastAPI, frontend_dir: Path | None, fallback: Path) -> 
 
 def create_app(vault_path: str | Path, env_path: str | Path | None = None) -> FastAPI:
     root = Path(vault_path).expanduser().resolve()
-    static_root = Path(str(files("obsidian_karpathy").joinpath("static")))
+    static_root = Path(str(files("obsidian_knowledge_base").joinpath("static")))
     frontend_dir = _resolve_frontend_dir()
     runtime = RuntimeState()
     

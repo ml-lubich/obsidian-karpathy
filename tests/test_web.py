@@ -2,7 +2,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from obsidian_karpathy.web import create_app
+from obsidian_knowledge_base.web import create_app
 
 
 def test_web_app_serves_index_health_and_graph(tmp_path: Path) -> None:

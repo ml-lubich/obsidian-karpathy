@@ -1,4 +1,4 @@
-from obsidian_karpathy.config import Settings
+from obsidian_knowledge_base.config import Settings
 
 
 def test_settings_enable_llm_when_api_key_exists(monkeypatch) -> None:

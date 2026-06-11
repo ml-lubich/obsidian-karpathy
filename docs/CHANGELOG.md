@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
+- Renamed project to **Obsidian Knowledge Base** (`obsidian-knowledge-base`, Python module `obsidian_knowledge_base`); Andrej Karpathy kept as inspiration/SEO reference in README, description, and keywords.
 
 - Claude/Anthropic LLM support alongside OpenAI. Configure via `ANTHROPIC_API_KEY` environment variable.
 - Auto-detection of LLM provider: uses Claude by default when both OpenAI and Claude keys are present; override with `OKG_OPENAI_PREFER=true`.
@@ -53,7 +54,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- Initial release of `obsidian-karpathy` / `okg` CLI.
+- Initial release of `obsidian-knowledge-base` / `okg` CLI.
 - Markdown parser: Obsidian wiki links (`[[Note]]`, `[[Folder/Note]]`, aliases), Markdown links, front-matter tags, inline hashtags.
 - Graph builder: deduplication, ghost nodes for missing links, edge typing (wiki / markdown / tag).
 - `okg build` — write graph JSON to disk.

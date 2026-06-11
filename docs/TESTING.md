@@ -41,7 +41,7 @@ A feature is complete when:
 Configured in `pyproject.toml` under `[tool.pytest.ini_options]`:
 
 ```
---cov=obsidian_karpathy --cov-report=term-missing --cov-fail-under=80
+--cov=obsidian_knowledge_base --cov-report=term-missing --cov-fail-under=80
 ```
 
 No surfaces are intentionally excluded from coverage.

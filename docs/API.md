@@ -211,7 +211,7 @@ Container/runtime health endpoint.
 ## Python API
 
 ```python
-from obsidian_karpathy import build_graph
+from obsidian_knowledge_base import build_graph
 
 graph = build_graph(Path("my-vault"))
 graph.nodes        # list[Node]

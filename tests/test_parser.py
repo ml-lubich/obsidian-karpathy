@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from obsidian_karpathy.parser import note_id_for, parse_note, slugify
+from obsidian_knowledge_base.parser import note_id_for, parse_note, slugify
 
 
 def test_parse_note_extracts_metadata_links_tags_and_summary(tmp_path: Path) -> None:

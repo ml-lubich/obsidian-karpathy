@@ -12,10 +12,10 @@ import uvicorn
 from rich.console import Console
 from rich.table import Table
 
-from obsidian_karpathy import __version__
-from obsidian_karpathy.config import Settings
-from obsidian_karpathy.graph import build_graph
-from obsidian_karpathy.web import create_app
+from obsidian_knowledge_base import __version__
+from obsidian_knowledge_base.config import Settings
+from obsidian_knowledge_base.graph import build_graph
+from obsidian_knowledge_base.web import create_app
 
 app = typer.Typer(
     name="okg",
@@ -51,7 +51,7 @@ def _cfg_vault(vault: Path | None, cfg: Settings) -> Path:
 
 def _version_callback(value: bool) -> None:
     if value:
-        console.print(f"obsidian-karpathy {__version__}")
+        console.print(f"obsidian-knowledge-base {__version__}")
         raise typer.Exit
 
 
@@ -131,6 +131,6 @@ def init_demo(
     """Copy a small sample vault for instant exploration."""
     if destination.exists():
         raise typer.BadParameter(f"Destination already exists: {destination}")
-    with as_file(files("obsidian_karpathy").joinpath("demo_vault")) as source:
+    with as_file(files("obsidian_knowledge_base").joinpath("demo_vault")) as source:
         shutil.copytree(source, destination)
     console.print(f"[green]Created[/green] {destination}. Try: okg serve {destination}")

@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../src/obsidian_karpathy/static/dist",
+    outDir: "../src/obsidian_knowledge_base/static/dist",
     emptyOutDir: true,
   },
 });

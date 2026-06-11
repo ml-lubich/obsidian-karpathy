@@ -1,7 +1,7 @@
 import pytest
 
-from obsidian_karpathy import llm
-from obsidian_karpathy.llm import LLMConfig, chat_with_vault, summarize_markdown
+from obsidian_knowledge_base import llm
+from obsidian_knowledge_base.llm import LLMConfig, chat_with_vault, summarize_markdown
 
 
 @pytest.fixture(autouse=True)

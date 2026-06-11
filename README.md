@@ -1,10 +1,9 @@
-# Obsidian Karpathy
+# Obsidian Knowledge Base
 
-A Karpathy-inspired knowledge graph explorer for any Obsidian-style Markdown vault. It parses
-wiki links, Markdown links, tags, front matter, and summaries, then serves a sleek force-directed
-graph with search, filters, stats, and node inspection.
-
-This project is inspired by Andrej Karpathy's practical, model-first approach to building tools.
+A knowledge graph explorer for any Obsidian-style Markdown vault, inspired by
+[Andrej Karpathy](https://karpathy.ai/)'s practical, model-first approach to building tools.
+It parses wiki links, Markdown links, tags, front matter, and summaries, then serves a sleek
+force-directed graph with search, filters, stats, and node inspection.
 
 Created by [Misha Lubich](https://mishalubich.com) ([ml-lubich](https://github.com/ml-lubich)).
 
@@ -116,7 +115,7 @@ The full repo verification gate is `bun run ci` from the repo root.
 
 - Website: https://mishalubich.com
 - GitHub: https://github.com/ml-lubich
-- Repository: https://github.com/ml-lubich/obsidian-karpathy
+- Repository: https://github.com/ml-lubich/obsidian-knowledge-base
 
 ## License
 

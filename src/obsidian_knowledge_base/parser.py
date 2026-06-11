@@ -5,7 +5,7 @@ from pathlib import Path
 
 from markdown_it import MarkdownIt
 
-from obsidian_karpathy.models import Note
+from obsidian_knowledge_base.models import Note
 
 FRONTMATTER_RE = re.compile(r"\A---\s*\n(?P<meta>.*?)\n---\s*\n?", re.DOTALL)
 WIKI_LINK_RE = re.compile(r"\[\[(?P<target>[^\]#|]+)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]")

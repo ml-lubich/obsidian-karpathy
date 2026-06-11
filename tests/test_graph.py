@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from obsidian_karpathy.graph import build_graph, graph_to_jsonable
+from obsidian_knowledge_base.graph import build_graph, graph_to_jsonable
 
 
 def write_note(root: Path, relative: str, body: str) -> None:

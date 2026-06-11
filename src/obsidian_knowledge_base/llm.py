@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from obsidian_karpathy.config import Settings
+from obsidian_knowledge_base.config import Settings
 
 
 @dataclass(slots=True)

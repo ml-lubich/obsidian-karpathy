@@ -3,8 +3,8 @@ from __future__ import annotations
 from collections import Counter
 from pathlib import Path
 
-from obsidian_karpathy.models import Edge, KnowledgeGraph, Node, Note
-from obsidian_karpathy.parser import parse_note, slugify
+from obsidian_knowledge_base.models import Edge, KnowledgeGraph, Node, Note
+from obsidian_knowledge_base.parser import parse_note, slugify
 
 
 def build_graph(vault_path: str | Path) -> KnowledgeGraph:

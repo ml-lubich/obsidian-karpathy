@@ -2,7 +2,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from obsidian_karpathy.cli import app
+from obsidian_knowledge_base.cli import app
 
 
 def test_build_and_stats_commands(tmp_path: Path) -> None:
@@ -27,4 +27,4 @@ def test_version_command() -> None:
     result = CliRunner().invoke(app, ["--version"])
 
     assert result.exit_code == 0
-    assert "obsidian-karpathy" in result.output
+    assert "obsidian-knowledge-base" in result.output
