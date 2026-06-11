@@ -12,6 +12,10 @@ def _clear_llm_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("LLM_PROVIDER", raising=False)
     monkeypatch.delenv("OKG_OPENAI_PREFER", raising=False)
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    monkeypatch.delenv("LLM_BASE_URL", raising=False)
+    monkeypatch.delenv("LLM_MODEL", raising=False)
+    monkeypatch.delenv("OKG_OPENAI_BASE_URL", raising=False)
 
 
 def test_llm_config_is_disabled_without_api_key() -> None:
@@ -130,3 +134,42 @@ def test_llm_provider_explicit_override_via_env(monkeypatch: pytest.MonkeyPatch)
 
     assert cfg.provider == "openai"
     assert cfg.api_key == "oai-key"
+
+
+def test_llm_config_enables_keyless_local_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LLM_BASE_URL", "http://localhost:11434/v1")
+
+    assert LLMConfig.from_env().enabled is True
+
+
+def test_llm_config_generic_base_url_routes_openai_compatible(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LLM_BASE_URL", "http://localhost:11434/v1")
+
+    assert LLMConfig.from_env().provider == "openai"
+
+
+def test_llm_config_generic_model_takes_precedence(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LLM_BASE_URL", "http://localhost:11434/v1")
+    monkeypatch.setenv("LLM_MODEL", "llama3.2")
+
+    assert LLMConfig.from_env().model == "llama3.2"
+
+
+def test_llm_config_generic_key_beats_openai_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "oai-key")
+    monkeypatch.setenv("LLM_API_KEY", "generic-key")
+
+    assert LLMConfig.from_env().api_key == "generic-key"
+
+
+def test_llm_config_generic_endpoint_wins_over_anthropic_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ant-key")
+    monkeypatch.setenv("LLM_BASE_URL", "http://localhost:11434/v1")
+
+    assert LLMConfig.from_env().provider == "openai"
+
+
+def test_default_openai_url_without_key_stays_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OKG_OPENAI_BASE_URL", "https://api.openai.com/v1")
+
+    assert LLMConfig.from_env().enabled is False

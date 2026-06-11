@@ -25,13 +25,13 @@ class LLMConfig:
         cfg = Settings()
         provider = _detect_provider(cfg, provider_override)
         api_key = api_key_override or _pick_api_key(cfg, provider)
-        base_url = base_url_override or cfg.openai_base_url.strip()
+        base_url = base_url_override or _pick_base_url(cfg)
         model = model_override or _pick_model(cfg, provider)
         return cls(
             api_key=api_key,
             base_url=base_url,
             model=model,
-            enabled=bool(api_key),
+            enabled=_is_enabled(api_key, base_url, provider),
             provider=provider,
         )
 
@@ -48,13 +48,27 @@ def _detect_provider(cfg: Settings, override: str) -> Literal["openai", "anthrop
 def _pick_api_key(cfg: Settings, provider: Literal["openai", "anthropic"]) -> str:
     if provider == "anthropic":
         return cfg.anthropic_api_key.strip()
-    return cfg.openai_api_key.strip()
+    return cfg.llm_api_key.strip() or cfg.openai_api_key.strip()
+
+
+def _pick_base_url(cfg: Settings) -> str:
+    return cfg.llm_base_url.strip() or cfg.openai_base_url.strip()
 
 
 def _pick_model(cfg: Settings, provider: Literal["openai", "anthropic"]) -> str:
     if provider == "anthropic":
         return cfg.anthropic_model.strip() or "claude-3-5-sonnet-20241022"
-    return cfg.openai_model.strip() or "gpt-4o-mini"
+    return cfg.llm_model.strip() or cfg.openai_model.strip() or "gpt-4o-mini"
+
+
+_DEFAULT_OPENAI_URL = "https://api.openai.com/v1"
+
+
+def _is_enabled(api_key: str, base_url: str, provider: Literal["openai", "anthropic"]) -> bool:
+    """A key always enables; a custom OpenAI-compatible endpoint enables keyless (Ollama, LM Studio)."""
+    if api_key:
+        return True
+    return provider == "openai" and bool(base_url) and base_url != _DEFAULT_OPENAI_URL
 
 
 def _build_vault_context(graph_data: dict) -> str:
@@ -140,7 +154,8 @@ def _call_openai(
 ) -> str:
     from openai import OpenAI  # noqa: PLC0415
 
-    client = OpenAI(api_key=config.api_key, base_url=config.base_url)
+    # Keyless local endpoints (Ollama, LM Studio) reject empty keys client-side; send a placeholder.
+    client = OpenAI(api_key=config.api_key or "not-needed", base_url=config.base_url)
     resp = client.chat.completions.create(model=config.model, messages=api_messages)  # type: ignore[arg-type]
     return resp.choices[0].message.content or ""
 
@@ -211,7 +226,10 @@ def chat_with_vault(
     focus_node_id: str = "",
 ) -> str:
     if not config.enabled:
-        raise ValueError("LLM is not configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable.")
+        raise ValueError(
+            "LLM is not configured. Set LLM_BASE_URL (any OpenAI-compatible endpoint, e.g. Ollama), "
+            "LLM_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY."
+        )
     user_text = messages[-1]["content"] if messages else ""
     context = _context_for_mode(mode, graph_data, focus_node_id, user_text)
     system = _make_system_prompt(context)

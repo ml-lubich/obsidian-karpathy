@@ -156,11 +156,13 @@ def _resolved_llm(runtime: RuntimeState) -> LLMConfig:
     api_key = runtime_key or cfg.api_key
     base_url = runtime_base or cfg.base_url
     model = runtime_model or cfg.model
+    # Keyless custom OpenAI-compatible endpoints (Ollama, LM Studio) are valid.
+    keyless_local = provider == "openai" and bool(base_url) and base_url != "https://api.openai.com/v1"
     return LLMConfig(
         api_key=api_key,
         base_url=base_url,
         model=model,
-        enabled=bool(api_key),
+        enabled=bool(api_key) or keyless_local,
         provider=provider,
     )
 
@@ -356,7 +358,13 @@ def _add_graph_routes(app: FastAPI, root: Path, runtime: RuntimeState, env_path:
     def chat(req: ChatRequest) -> ChatResponse:
         cfg = _resolved_llm(runtime)
         if not cfg.enabled:
-            raise HTTPException(status_code=503, detail="LLM not configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY.")
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "LLM not configured. Set LLM_BASE_URL (any OpenAI-compatible endpoint, e.g. Ollama), "
+                    "LLM_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY — or configure it in Settings."
+                ),
+            )
         graph_data = build_graph(root).to_dict()
         mode = req.mode or runtime.mode
         reply = chat_with_vault(req.messages, graph_data, cfg, mode=mode, focus_node_id=req.focus_node_id)

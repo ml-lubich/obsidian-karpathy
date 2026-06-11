@@ -55,17 +55,29 @@ docker compose up --build
 This runs the backend and serves the built React frontend at `http://127.0.0.1:8765`.
 To use your own vault, replace the mounted `./examples/demo-vault` path in `docker-compose.yml`.
 
-## LLM Wiring (OpenAI-compatible)
+## LLM Wiring (any provider)
 
-Copy `.env.example` to `.env` and set your key if your local `.env` does not already exist:
+Works with **any OpenAI-compatible endpoint** — Ollama, LM Studio, Groq, OpenRouter,
+Mistral, DeepSeek, Gemini (compat mode), OpenAI — plus native Anthropic Claude. No
+specific vendor account is required.
+
+Local, keyless (Ollama):
 
 ```bash
-OPENAI_API_KEY=your_key_here
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4o-mini
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_MODEL=llama3.2
 ```
 
-Any OpenAI-compatible endpoint works (OpenAI, Ollama, Groq, etc.).
+Hosted (any compatible provider):
+
+```bash
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL=meta-llama/llama-3.3-70b-instruct
+LLM_API_KEY=your_key_here
+```
+
+Classic vars still work: `OPENAI_API_KEY` / `OPENAI_BASE_URL` / `OPENAI_MODEL`,
+or `ANTHROPIC_API_KEY` for Claude. Generic `LLM_*` vars take precedence.
 
 ## CLI
 

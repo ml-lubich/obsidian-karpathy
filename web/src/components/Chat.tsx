@@ -42,7 +42,7 @@ export function Chat({ enabled, mode, focusNodeId }: Props) {
     return (
       <div className="chat-disabled">
         <p>🤖 LLM not configured.</p>
-        <p>Set <code>OPENAI_API_KEY</code> (and optionally <code>OPENAI_BASE_URL</code>, <code>OPENAI_MODEL</code>) to enable AI chat.</p>
+        <p>Set <code>LLM_BASE_URL</code> (any OpenAI-compatible endpoint, e.g. local Ollama — no key needed) or an API key (<code>LLM_API_KEY</code>, <code>OPENAI_API_KEY</code>, <code>ANTHROPIC_API_KEY</code>) to enable AI chat.</p>
         <p>Works with OpenAI, Ollama, Groq, and any OpenAI-compatible endpoint.</p>
       </div>
     );

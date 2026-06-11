@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
+- Provider-agnostic LLM support: generic `LLM_BASE_URL` / `LLM_MODEL` / `LLM_API_KEY` env vars route any OpenAI-compatible endpoint (Ollama, LM Studio, Groq, OpenRouter, Mistral, DeepSeek, ...). Keyless local endpoints work without any API key; no Anthropic or OpenAI account required.
 - Renamed project to **Obsidian Knowledge Base** (`obsidian-knowledge-base`, Python module `obsidian_knowledge_base`); Andrej Karpathy kept as inspiration/SEO reference in README, description, and keywords.
 
 - Claude/Anthropic LLM support alongside OpenAI. Configure via `ANTHROPIC_API_KEY` environment variable.

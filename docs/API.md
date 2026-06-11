@@ -101,6 +101,9 @@ Update runtime (in-memory) LLM settings used by chat and summarize jobs.
 
 | Var | Example | Meaning |
 |---|---|---|
+| `LLM_BASE_URL` | `http://localhost:11434/v1` | Generic OpenAI-compatible endpoint (Ollama, LM Studio, Groq, OpenRouter, Mistral, DeepSeek, ...). Enables LLM even without a key for local servers. Takes precedence over provider-specific vars. |
+| `LLM_MODEL` | `llama3.2` | Model ID for the generic endpoint |
+| `LLM_API_KEY` | `...` | API key for the generic endpoint (optional for keyless local servers) |
 | `OPENAI_API_KEY` | `sk-...` | OpenAI API key; enables OpenAI backend |
 | `ANTHROPIC_API_KEY` | `sk-ant-...` | Claude API key; enables Claude backend |
 | `OKG_OPENAI_MODEL` | `gpt-4o` | Override OpenAI model (default `gpt-4o-mini`) |
@@ -108,7 +111,7 @@ Update runtime (in-memory) LLM settings used by chat and summarize jobs.
 | `OKG_OPENAI_BASE_URL` | `https://api.openai.com/v1` | Custom OpenAI-compatible endpoint |
 | `OKG_OPENAI_PREFER` | `true` | Prefer OpenAI over Claude when both are configured |
 
-**Provider selection:** If both keys are configured, Claude is preferred by default. Set `OKG_OPENAI_PREFER=true` to use OpenAI instead.
+**Provider selection:** Generic `LLM_*` vars win and route through the OpenAI-compatible client (no Anthropic/OpenAI account needed). Otherwise, if both keys are configured, Claude is preferred by default; set `OKG_OPENAI_PREFER=true` to use OpenAI instead. A custom OpenAI-compatible `base_url` enables the LLM even with no API key (keyless local servers).
 
 ### Vault & Server
 

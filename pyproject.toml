@@ -1,6 +1,6 @@
 [project]
 name = "obsidian-knowledge-base"
-version = "0.4.0"
+version = "0.5.0"
 description = "Obsidian Knowledge Base — a knowledge graph explorer for Obsidian vaults, inspired by Andrej Karpathy's model-first tooling philosophy. CLI + sleek web UI."
 readme = "README.md"
 requires-python = ">=3.11"
