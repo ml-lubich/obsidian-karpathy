@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ChatMode, GraphData, GraphNode, LLMStatus } from "../types";
+import type { ChatMode, GraphData, GraphNode, LLMProvider, LLMStatus } from "../types";
 import { Inspector } from "./Inspector";
 import { Chat } from "./Chat";
 import { Settings } from "./Settings";
@@ -11,13 +11,14 @@ interface Props {
   mode: ChatMode;
   model: string;
   baseUrl: string;
+  provider: LLMProvider;
   onSelect: (node: GraphNode | null) => void;
   onSettingsSaved: (status: LLMStatus) => void;
 }
 
 type Tab = "inspector" | "chat" | "settings";
 
-export function RightPanel({ graph, selected, llmEnabled, mode, model, baseUrl, onSelect, onSettingsSaved }: Props) {
+export function RightPanel({ graph, selected, llmEnabled, mode, model, baseUrl, provider, onSelect, onSettingsSaved }: Props) {
   const [tab, setTab] = useState<Tab>("inspector");
 
   return (
@@ -42,6 +43,7 @@ export function RightPanel({ graph, selected, llmEnabled, mode, model, baseUrl, 
             mode={mode}
             model={model}
             baseUrl={baseUrl}
+            provider={provider}
             onSettingsSaved={onSettingsSaved}
           />
         )}

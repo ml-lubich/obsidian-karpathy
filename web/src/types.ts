@@ -41,11 +41,14 @@ export interface ChatMessage {
   content: string;
 }
 
+export type LLMProvider = "openai" | "anthropic";
+
 export interface LLMStatus {
   enabled: boolean;
   model: string;
   base_url: string;
   mode: ChatMode;
+  provider: LLMProvider;
   api_key_source?: string;
 }
 
@@ -56,6 +59,7 @@ export interface LLMSettingsInput {
   base_url: string;
   model: string;
   mode: ChatMode;
+  provider: LLMProvider;
 }
 
 export interface JobRecord {

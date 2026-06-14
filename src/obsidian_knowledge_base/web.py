@@ -141,10 +141,23 @@ def _load_persisted_settings(runtime: RuntimeState, env_path: Path = Path(".env"
     runtime.provider = provider  # type: ignore[assignment]
     if provider == "anthropic":
         runtime.api_key = _read_env_value("ANTHROPIC_API_KEY", env_path)
+        runtime.model = _read_env_value("ANTHROPIC_MODEL", env_path)
     else:
-        runtime.api_key = _read_env_value("OPENAI_API_KEY", env_path)
-    runtime.base_url = _read_env_value("OPENAI_BASE_URL", env_path)
-    runtime.model = _read_env_value("OPENAI_MODEL", env_path)
+        runtime.api_key = (
+            _read_env_value("LLM_API_KEY", env_path)
+            or _read_env_value("OPENAI_API_KEY", env_path)
+        )
+        runtime.model = (
+            _read_env_value("LLM_MODEL", env_path)
+            or _read_env_value("OPENAI_MODEL", env_path)
+        )
+    runtime.base_url = (
+        _read_env_value("LLM_BASE_URL", env_path)
+        or _read_env_value("OPENAI_BASE_URL", env_path)
+    )
+    saved_mode = _read_env_value("LLM_MODE", env_path)
+    if saved_mode in ("basic", "rag", "tools"):
+        runtime.mode = saved_mode  # type: ignore[assignment]
 
 
 def _resolved_llm(runtime: RuntimeState) -> LLMConfig:
@@ -347,11 +360,13 @@ def _add_graph_routes(app: FastAPI, root: Path, runtime: RuntimeState, env_path:
             _write_env_value(key_name, runtime.api_key, env_path)
         if req.base_url.strip():
             runtime.base_url = req.base_url.strip()
-            _write_env_value("OPENAI_BASE_URL", runtime.base_url, env_path)
+            _write_env_value("LLM_BASE_URL", runtime.base_url, env_path)
         if req.model.strip():
             runtime.model = req.model.strip()
-            _write_env_value("OPENAI_MODEL", runtime.model, env_path)
+            model_key = "ANTHROPIC_MODEL" if req.provider == "anthropic" else "LLM_MODEL"
+            _write_env_value(model_key, runtime.model, env_path)
         runtime.mode = req.mode
+        _write_env_value("LLM_MODE", req.mode, env_path)
         return _llm_status(runtime)
 
     @app.post("/api/chat", response_model=ChatResponse)

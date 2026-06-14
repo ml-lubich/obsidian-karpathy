@@ -41,19 +41,61 @@ def test_web_app_can_update_llm_settings_runtime(tmp_path: Path) -> None:
         "base_url": "http://localhost:11434/v1",
         "model": "llama3.1",
         "mode": "tools",
+        "provider": "openai",
     }
     updated = client.post("/api/settings/llm", json=payload)
 
     assert updated.status_code == 200
     assert updated.json()["enabled"] is True
     assert updated.json()["mode"] == "tools"
-    
-    # Verify settings were persisted to temp .env file
+
+    # Verify settings were persisted to .env with correct key names
     assert env_file.exists()
     env_content = env_file.read_text()
     assert "OPENAI_API_KEY=runtime-key" in env_content
-    assert "OPENAI_BASE_URL=http://localhost:11434/v1" in env_content
-    assert "OPENAI_MODEL=llama3.1" in env_content
+    assert "LLM_BASE_URL=http://localhost:11434/v1" in env_content
+    assert "LLM_MODEL=llama3.1" in env_content
+    assert "LLM_MODE=tools" in env_content
+    assert "LLM_PROVIDER=openai" in env_content
+
+
+def test_web_settings_persist_mode_across_restart(tmp_path: Path) -> None:
+    (tmp_path / "Home.md").write_text("# Home", encoding="utf-8")
+    env_file = tmp_path / ".env"
+
+    # First app instance: save mode=basic
+    client1 = TestClient(create_app(tmp_path, env_file))
+    saved = client1.post("/api/settings/llm", json={"mode": "basic", "provider": "openai"})
+    assert saved.json()["mode"] == "basic"
+
+    # Second app instance loading same .env: mode must survive restart
+    client2 = TestClient(create_app(tmp_path, env_file))
+    status = client2.get("/api/llm-status")
+    assert status.json()["mode"] == "basic"
+
+
+def test_web_settings_persist_anthropic_provider(tmp_path: Path) -> None:
+    (tmp_path / "Home.md").write_text("# Home", encoding="utf-8")
+    env_file = tmp_path / ".env"
+
+    client = TestClient(create_app(tmp_path, env_file))
+    client.post("/api/settings/llm", json={
+        "api_key": "sk-ant-test",
+        "model": "claude-sonnet-4-6",
+        "mode": "rag",
+        "provider": "anthropic",
+    })
+
+    env_content = env_file.read_text()
+    assert "LLM_PROVIDER=anthropic" in env_content
+    assert "ANTHROPIC_API_KEY=sk-ant-test" in env_content
+    assert "ANTHROPIC_MODEL=claude-sonnet-4-6" in env_content
+
+    # Reload and confirm provider + model survive
+    client2 = TestClient(create_app(tmp_path, env_file))
+    status = client2.get("/api/llm-status").json()
+    assert status["provider"] == "anthropic"
+    assert status["model"] == "claude-sonnet-4-6"
 
 
 def test_web_jobs_summarize_and_prune(tmp_path: Path) -> None:
